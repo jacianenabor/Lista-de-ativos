@@ -261,6 +261,10 @@
       <select class="hf-select" id="hfGestao" onchange="applyGlobalFilters()"><option value="">Todos</option></select>
     </div>
     <div class="hf-group">
+      <label>Gerência</label>
+      <select class="hf-select" id="hfGerente" onchange="applyGlobalFilters()"><option value="">Todos</option></select>
+    </div>
+    <div class="hf-group">
       <label>Empresa</label>
       <select class="hf-select" id="hfEmpresa" onchange="applyGlobalFilters()"><option value="">Todos</option></select>
     </div>
@@ -318,6 +322,10 @@
         <div class="filter-group">
           <label>Supervisão</label>
           <select id="tableGestao" onchange="applyTableFilters()"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Gerência</label>
+          <select id="tableGerente" onchange="applyTableFilters()"><option value="">Todos</option></select>
         </div>
         <div class="filter-group">
           <label>Empresa</label>
@@ -505,6 +513,11 @@ function populateHeaderFilters() {
     return kl.includes('gestao 2') || kl.includes('gestão 2') || kl.includes('supervisão') || kl.includes('supervisao') || kl.includes('supervis');
   }) || '';
 
+  window._gerenteCol = sampleKeys.find(k => {
+    const kl = k.toLowerCase();
+    return kl.includes('gestao 3') || kl.includes('gestão 3') || kl.includes('gerente') || kl.includes('gerência') || kl.includes('gerencia');
+  }) || '';
+
   // Popula Empresa no header
   const empresaHfSel = document.getElementById('hfEmpresa');
   empresaHfSel.innerHTML = '<option value="">Todos</option>';
@@ -518,6 +531,15 @@ function populateHeaderFilters() {
   if (window._gestaoCol) {
     uniqueValuesCI(allData, window._gestaoCol).forEach(v => {
       const o = document.createElement('option'); o.value = v; o.textContent = v; gestaoHfSel.appendChild(o);
+    });
+  }
+
+  // Popula Gerência no header
+  const gerenteHfSel = document.getElementById('hfGerente');
+  gerenteHfSel.innerHTML = '<option value="">Todos</option>';
+  if (window._gerenteCol) {
+    uniqueValuesCI(allData, window._gerenteCol).forEach(v => {
+      const o = document.createElement('option'); o.value = v; o.textContent = v; gerenteHfSel.appendChild(o);
     });
   }
 }
@@ -554,7 +576,16 @@ function populateTableFilters() {
   }
   gestaoSel.value = gestaoVal;
 
-  // Empresa
+  // Gerência
+  const gerenteSel = document.getElementById('tableGerente');
+  const gerenteVal = gerenteSel.value;
+  gerenteSel.innerHTML = '<option value="">Todos</option>';
+  if (window._gerenteCol) {
+    uniqueValuesCI(src, window._gerenteCol).forEach(v => {
+      const o = document.createElement('option'); o.value = v; o.textContent = v; gerenteSel.appendChild(o);
+    });
+  }
+  gerenteSel.value = gerenteVal;
   const empresaSel = document.getElementById('tableEmpresa');
   const empresaVal = empresaSel.value;
   empresaSel.innerHTML = '<option value="">Todos</option>';
@@ -573,6 +604,7 @@ function applyGlobalFilters() {
   const proc    = document.getElementById('hfProcesso').value;
   const classif = document.getElementById('hfClassificacao').value;
   const gestao  = document.getElementById('hfGestao').value;
+  const gerente = document.getElementById('hfGerente').value;
   const empresa = document.getElementById('hfEmpresa').value;
   const pcd     = document.getElementById('hfPCD').value;
 
@@ -584,6 +616,7 @@ function applyGlobalFilters() {
     if (proc   && r['Processo']?.trim().toLowerCase() !== proc.toLowerCase())         return false;
     if (classif&& r['Classificacao']?.trim().toLowerCase() !== classif.toLowerCase()) return false;
     if (gestao && window._gestaoCol && r[window._gestaoCol]?.trim().toLowerCase() !== gestao.toLowerCase()) return false;
+    if (gerente && window._gerenteCol && r[window._gerenteCol]?.trim().toLowerCase() !== gerente.toLowerCase()) return false;
     if (empresa && r['Empresa']?.trim().toLowerCase() !== empresa.toLowerCase())      return false;
     if (pcd === 'NAO' && r['PCD'] !== 'NÃO' && r['PCD'] !== '') return false;
     if (pcd === 'SIM' && (r['PCD'] === 'NÃO' || r['PCD'] === '')) return false;
@@ -604,7 +637,7 @@ function applyGlobalFilters() {
 }
 
 function clearGlobalFilters() {
-  ['hfSearch','hfTL','hfTurno','hfStatus','hfProcesso','hfClassificacao','hfGestao','hfEmpresa','hfPCD'].forEach(id => {
+  ['hfSearch','hfTL','hfTurno','hfStatus','hfProcesso','hfClassificacao','hfGestao','hfGerente','hfEmpresa','hfPCD'].forEach(id => {
     const el = document.getElementById(id);
     el.value = '';
   });
@@ -620,8 +653,9 @@ function updatePills() {
     { id:'hfStatus', label:'Status' },
     { id:'hfProcesso', label:'Processo' },
     { id:'hfClassificacao', label:'Classif.' },
-    { id:'hfGestao', label:'Supervisão' },
-    { id:'hfEmpresa', label:'Empresa' },
+    { id:'hfGestao',   label:'Supervisão' },
+    { id:'hfGerente',  label:'Gerência' },
+    { id:'hfEmpresa',  label:'Empresa' },
     { id:'hfPCD',    label:'PCD' },
   ];
   const pills = [];
@@ -652,6 +686,7 @@ function applyTableFilters() {
   const turno   = document.getElementById('tableTurno').value;
   const gestao  = document.getElementById('tableGestao').value;
   const empresa = document.getElementById('tableEmpresa').value;
+  const gerente = document.getElementById('tableGerente').value;
   const pcd     = document.getElementById('tablePCD').value;
 
   let data = activeTLClick
@@ -663,6 +698,7 @@ function applyTableFilters() {
     if (tl    && r['Gestor Imediato']?.trim().toLowerCase() !== tl.toLowerCase())    return false;
     if (turno && r['Macro Turno']?.trim().toLowerCase() !== turno.toLowerCase())      return false;
     if (gestao && window._gestaoCol && r[window._gestaoCol]?.trim().toLowerCase() !== gestao.toLowerCase()) return false;
+    if (gerente && window._gerenteCol && r[window._gerenteCol]?.trim().toLowerCase() !== gerente.toLowerCase()) return false;
     if (empresa && r['Empresa']?.trim().toLowerCase() !== empresa.toLowerCase())      return false;
     if (pcd === 'NAO' && r['PCD'] !== 'NÃO' && r['PCD'] !== '') return false;
     if (pcd === 'SIM' && (r['PCD'] === 'NÃO' || r['PCD'] === '')) return false;
@@ -679,6 +715,7 @@ function clearTableFilters() {
   document.getElementById('tableTL').value = '';
   document.getElementById('tableTurno').value = '';
   document.getElementById('tableGestao').value = '';
+  document.getElementById('tableGerente').value = '';
   document.getElementById('tableEmpresa').value = '';
   document.getElementById('tablePCD').value = '';
   applyTableFilters();
