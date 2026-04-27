@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Ativos · Service Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FEE600;
+    --yellow-dark: #E5CE00;
+    --near-black: #1C1C1C;
+    --dark: #2a2a2a;
+    --surface: #f5f5f0;
+    --card: #ffffff;
+    --border: #e8e8e2;
+    --text: #1C1C1C;
+    --text-muted: #6b6b6b;
+    --status-ativo: #16a34a;
+    --status-afastado: #dc2626;
+    --status-ferias: #2563eb;
+    --status-other: #9333ea;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--near-black);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-badge {
+    background: var(--yellow);
+    color: var(--near-black);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 5px 11px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #last-updated {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .refresh-btn {
+    background: var(--yellow);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--near-black);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .refresh-btn:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ─── MAIN LAYOUT ─── */
+  main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 32px;
+  }
+
+  /* ─── SUMMARY CARDS ─── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .summary-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .summary-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--yellow));
+  }
+
+  .summary-card .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .summary-card .value {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--near-black);
+    line-height: 1;
+  }
+
+  .summary-card .sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  /* ─── TL CARDS ─── */
+  .tl-section { margin-bottom: 28px; }
+
+  .tl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .tl-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tl-card:hover { border-color: var(--yellow); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .tl-card.active { border-color: var(--yellow); background: #fffde7; }
+
+  .tl-card::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--yellow);
+    transform: scaleY(0);
+    transition: transform 0.15s;
+  }
+  .tl-card.active::after, .tl-card:hover::after { transform: scaleY(1); }
+
+  .tl-name {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+    color: var(--near-black);
+  }
+
+  .tl-stats {
+    display: flex;
+    gap: 10px;
+  }
+
+  .tl-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tl-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--near-black);
+  }
+
+  .tl-stat-lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .tl-divider {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+    margin: 0 2px;
+  }
+
+  /* ─── CHARTS ─── */
+  .charts-section { margin-bottom: 28px; }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 16px;
+    color: var(--near-black);
+  }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+
+  .bar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .bar-label {
+    width: 130px;
+    flex-shrink: 0;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: var(--surface);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+  }
+
+  .bar-fill span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--near-black);
+    white-space: nowrap;
+  }
+
+  .bar-count {
+    width: 30px;
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  /* status colors */
+  .bar-fill.ativo { background: #bbf7d0; }
+  .bar-fill.afastado { background: #fecaca; }
+  .bar-fill.ferias { background: #bfdbfe; }
+
+  /* ─── FILTERS BAR ─── */
+  .filters-section { margin-bottom: 16px; }
+
+  .filters-bar {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .filter-group label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--text-muted);
+  }
+
+  .filter-group select,
+  .filter-group input {
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  .filter-group select:focus,
+  .filter-group input:focus { border-color: var(--yellow); background: #fff; }
+
+  .search-input { min-width: 240px; }
+
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .clear-btn {
+    border: 1.5px solid var(--border);
+    background: transparent;
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { border-color: var(--near-black); color: var(--near-black); }
+
+  .results-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    align-self: flex-end;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ─── TABLE ─── */
+  .table-section { margin-bottom: 32px; }
+
+  .table-wrapper {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead {
+    background: var(--near-black);
+    position: sticky;
+    top: 64px;
+  }
+
+  thead th {
+    padding: 12px 14px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: #aaa;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+
+  thead th:hover { color: var(--yellow); }
+  thead th.sort-asc::after { content: ' ↑'; color: var(--yellow); }
+  thead th.sort-desc::after { content: ' ↓'; color: var(--yellow); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fffde7; }
+
+  tbody td {
+    padding: 11px 14px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .td-name {
+    font-weight: 600;
+    color: var(--near-black);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .td-matricula {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-ativo { background: #dcfce7; color: #15803d; }
+  .badge-afastado { background: #fee2e2; color: #b91c1c; }
+  .badge-ferias { background: #dbeafe; color: #1d4ed8; }
+  .badge-other { background: #f3e8ff; color: #7e22ce; }
+  .badge-direto { background: #f0fdf4; color: #166534; }
+  .badge-suporte { background: #fef9c3; color: #854d0e; }
+  .badge-staff { background: #eff6ff; color: #1e40af; }
+  .badge-t1 { background: #fff7ed; color: #c2410c; }
+  .badge-t2 { background: #fdf4ff; color: #7e22ce; }
+  .badge-t3 { background: #f0f9ff; color: #0369a1; }
+  .badge-t4 { background: #f0fdf4; color: #166534; }
+  .badge-st { background: #faf5ff; color: #6b21a8; }
+  .badge-pcd { background: #fef2f2; color: #991b1b; }
+
+  .td-turno { color: var(--text-muted); font-size: 12px; }
+
+  /* ─── LOADING ─── */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28,28,28,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(254,230,0,0.3);
+    border-top-color: var(--yellow);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #fff;
+  }
+
+  /* ─── ERROR ─── */
+  .error-banner {
+    background: #fee2e2;
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    color: #b91c1c;
+    font-weight: 500;
+    display: none;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    display: none;
+  }
+
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    main { padding: 16px; }
+    header { padding: 0 16px; }
+    .filters-bar { flex-direction: column; }
+    .search-input { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando dados…</div>
+</div>
+
+<header>
+  <div class="logo">
+    <span class="logo-badge">ML</span>
+    <span class="logo-title">Lista de Ativos · Service Center</span>
+  </div>
+  <div class="header-right">
+    <span id="last-updated"></span>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+      ↻ Atualizar
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="error-banner" id="errorBanner"></div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid" id="summaryGrid"></div>
+
+  <!-- TL SECTION -->
+  <div class="tl-section">
+    <div class="section-title">Indicadores por Team Leader</div>
+    <div class="tl-grid" id="tlGrid"></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-section">
+    <div class="section-title">Distribuição</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Por Turno</div>
+        <div class="bar-chart" id="chartTurno"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Por Processo</div>
+        <div class="bar-chart" id="chartProcesso"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Por Status</div>
+        <div class="bar-chart" id="chartStatus"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Por Cargo</div>
+        <div class="bar-chart" id="chartCargo"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-section">
+    <div class="section-title">Lista de Operadores</div>
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Busca</label>
+        <input type="text" class="search-input" id="searchInput" placeholder="Nome ou matrícula…" oninput="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="filterStatus" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Turno</label>
+        <select id="filterTurno" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Processo</label>
+        <select id="filterProcesso" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Classificação</label>
+        <select id="filterClassificacao" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Team Leader</label>
+        <select id="filterTL" onchange="applyFilters()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>PCD</label>
+        <select id="filterPCD" onchange="applyFilters()">
+          <option value="">Todos</option>
+          <option value="NAO">Não</option>
+          <option value="SIM">PCD</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="clear-btn" onclick="clearFilters()">Limpar filtros</button>
+      </div>
+      <span class="results-count" id="resultsCount"></span>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <div class="table-wrapper">
+      <div class="table-scroll">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th onclick="sortBy('Nome')">Nome</th>
+              <th onclick="sortBy('Matricula')">Matrícula</th>
+              <th onclick="sortBy('Status')">Status</th>
+              <th onclick="sortBy('Cargo')">Cargo</th>
+              <th onclick="sortBy('Classificacao')">Classificação</th>
+              <th onclick="sortBy('Macro Turno')">Turno</th>
+              <th onclick="sortBy('Processo')">Processo</th>
+              <th onclick="sortBy('Sub- Processo')">Sub-Processo</th>
+              <th onclick="sortBy('Gestor Imediato')">Team Leader</th>
+              <th onclick="sortBy('Admissao')">Admissão</th>
+              <th onclick="sortBy('PCD')">PCD</th>
+              <th onclick="sortBy('Modelo')">Modelo</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState">
+        <div class="icon">🔍</div>
+        <p>Nenhum operador encontrado com os filtros atuais.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Dados sincronizados em tempo real via Google Sheets · Service Center © 2025
+</footer>
+
+<script>
+// ─── CONFIG ───
+const SHEET_ID = '1R8pfBnOdH_a86jECmo8dHuA2a0p1JeAju8OMDihbZ0U';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
+let allData = [];
+let filteredData = [];
+let sortCol = 'Nome';
+let sortAsc = true;
+let activeTL = null;
+
+// ─── LOAD DATA ───
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('errorBanner').style.display = 'none';
+
+  try {
+    const res = await fetch(SHEET_URL + '&rand=' + Date.now());
+    const text = await res.text();
+    const json = JSON.parse(text.slice(47, -2));
+    allData = parseGviz(json);
+    populateFilters();
+    renderSummary();
+    renderTLCards();
+    renderCharts();
+    applyFilters();
+
+    const now = new Date();
+    document.getElementById('last-updated').textContent =
+      `Atualizado ${now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
+  } catch (e) {
+    const banner = document.getElementById('errorBanner');
+    banner.textContent = '⚠️ Erro ao carregar dados. Verifique se a planilha está pública para "qualquer pessoa com o link".';
+    banner.style.display = 'block';
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+// ─── PARSE GOOGLE VIZ JSON ───
+function parseGviz(json) {
+  const cols = json.table.cols.map(c => c.label);
+  return json.table.rows.map(row => {
+    const obj = {};
+    cols.forEach((col, i) => {
+      const cell = row.c[i];
+      obj[col] = cell ? (cell.f || (cell.v !== null ? String(cell.v) : '')) : '';
+    });
+    return obj;
+  }).filter(r => r['Nome'] && r['Nome'].trim() !== '');
+}
+
+// ─── POPULATE FILTER DROPDOWNS ───
+function populateFilters() {
+  const fields = {
+    filterStatus: 'Status',
+    filterTurno: 'Macro Turno',
+    filterProcesso: 'Processo',
+    filterClassificacao: 'Classificacao',
+    filterTL: 'Gestor Imediato'
+  };
+
+  Object.entries(fields).forEach(([id, col]) => {
+    const sel = document.getElementById(id);
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Todos</option>';
+    const vals = [...new Set(allData.map(r => r[col]).filter(Boolean))].sort();
+    vals.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  });
+}
+
+// ─── SUMMARY CARDS ───
+function renderSummary() {
+  const total = allData.length;
+  const ativos = allData.filter(r => r['Status'] === 'Ativo').length;
+  const afastados = allData.filter(r => r['Status']?.toLowerCase().includes('afastado')).length;
+  const ferias = allData.filter(r => r['Status']?.toLowerCase().includes('férias') || r['Status']?.toLowerCase().includes('ferias')).length;
+  const pcds = allData.filter(r => r['PCD'] && r['PCD'] !== 'NÃO' && r['PCD'] !== 'NAO' && r['PCD'] !== '').length;
+  const tls = new Set(allData.map(r => r['Gestor Imediato']).filter(Boolean)).size;
+
+  const cards = [
+    { label: 'Total de Ativos', value: total, sub: 'operadores cadastrados', accent: '#FEE600' },
+    { label: 'Ativos', value: ativos, sub: `${((ativos/total)*100).toFixed(0)}% do total`, accent: '#bbf7d0' },
+    { label: 'Afastados', value: afastados, sub: `${((afastados/total)*100).toFixed(0)}% do total`, accent: '#fecaca' },
+    { label: 'Em Férias', value: ferias, sub: `${((ferias/total)*100).toFixed(0)}% do total`, accent: '#bfdbfe' },
+    { label: 'Team Leaders', value: tls, sub: 'gestores imediatos', accent: '#e9d5ff' },
+    { label: 'PCD', value: pcds, sub: `${((pcds/total)*100).toFixed(0)}% do quadro`, accent: '#fed7aa' },
+  ];
+
+  document.getElementById('summaryGrid').innerHTML = cards.map(c => `
+    <div class="summary-card" style="--accent:${c.accent}">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}</div>
+      <div class="sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ─── TL CARDS ───
+function renderTLCards() {
+  const tlMap = {};
+  allData.forEach(r => {
+    const tl = r['Gestor Imediato'];
+    if (!tl) return;
+    if (!tlMap[tl]) tlMap[tl] = { total: 0, ativos: 0, afastados: 0 };
+    tlMap[tl].total++;
+    if (r['Status'] === 'Ativo') tlMap[tl].ativos++;
+    if (r['Status']?.toLowerCase().includes('afastado')) tlMap[tl].afastados++;
+  });
+
+  const sorted = Object.entries(tlMap).sort((a,b) => b[1].total - a[1].total);
+
+  document.getElementById('tlGrid').innerHTML = sorted.map(([tl, stats]) => `
+    <div class="tl-card ${activeTL === tl ? 'active' : ''}" onclick="filterByTL('${tl.replace(/'/g,"\\'")}')">
+      <div class="tl-name">${tl}</div>
+      <div class="tl-stats">
+        <div class="tl-stat">
+          <span class="tl-stat-num">${stats.total}</span>
+          <span class="tl-stat-lbl">Total</span>
+        </div>
+        <div class="tl-divider"></div>
+        <div class="tl-stat">
+          <span class="tl-stat-num" style="color:#16a34a">${stats.ativos}</span>
+          <span class="tl-stat-lbl">Ativos</span>
+        </div>
+        <div class="tl-divider"></div>
+        <div class="tl-stat">
+          <span class="tl-stat-num" style="color:#dc2626">${stats.afastados}</span>
+          <span class="tl-stat-lbl">Afastados</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterByTL(tl) {
+  if (activeTL === tl) {
+    activeTL = null;
+    document.getElementById('filterTL').value = '';
+  } else {
+    activeTL = tl;
+    document.getElementById('filterTL').value = tl;
+  }
+  renderTLCards();
+  applyFilters();
+}
+
+// ─── CHARTS ───
+function renderCharts() {
+  renderBarChart('chartTurno', 'Macro Turno');
+  renderBarChart('chartProcesso', 'Processo');
+  renderStatusChart();
+  renderBarChart('chartCargo', 'Cargo');
+}
+
+function renderBarChart(containerId, col) {
+  const counts = {};
+  allData.forEach(r => {
+    const v = r[col] || 'N/D';
+    counts[v] = (counts[v] || 0) + 1;
+  });
+
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const max = sorted[0]?.[1] || 1;
+
+  document.getElementById(containerId).innerHTML = sorted.map(([label, count]) => `
+    <div class="bar-item">
+      <div class="bar-label" title="${label}">${label}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%">
+          <span>${count}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStatusChart() {
+  const counts = {};
+  allData.forEach(r => {
+    const v = r['Status'] || 'N/D';
+    counts[v] = (counts[v] || 0) + 1;
+  });
+
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const max = sorted[0]?.[1] || 1;
+
+  const classMap = {
+    'Ativo': 'ativo',
+    'Afastado INSS': 'afastado',
+    'Férias': 'ferias',
+  };
+
+  document.getElementById('chartStatus').innerHTML = sorted.map(([label, count]) => {
+    const cls = classMap[label] || '';
+    return `
+      <div class="bar-item">
+        <div class="bar-label" title="${label}">${label}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${cls}" style="width:${(count/max*100).toFixed(1)}%">
+            <span>${count}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── FILTERS ───
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  const status = document.getElementById('filterStatus').value;
+  const turno = document.getElementById('filterTurno').value;
+  const processo = document.getElementById('filterProcesso').value;
+  const classif = document.getElementById('filterClassificacao').value;
+  const tl = document.getElementById('filterTL').value;
+  const pcd = document.getElementById('filterPCD').value;
+
+  filteredData = allData.filter(r => {
+    if (search) {
+      const haystack = `${r['Nome']} ${r['Matricula']}`.toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    if (status && r['Status'] !== status) return false;
+    if (turno && r['Macro Turno'] !== turno) return false;
+    if (processo && r['Processo'] !== processo) return false;
+    if (classif && r['Classificacao'] !== classif) return false;
+    if (tl && r['Gestor Imediato'] !== tl) return false;
+    if (pcd === 'NAO' && (r['PCD'] !== 'NÃO' && r['PCD'] !== '')) return false;
+    if (pcd === 'SIM' && (r['PCD'] === 'NÃO' || r['PCD'] === '')) return false;
+    return true;
+  });
+
+  sortData();
+  renderTable();
+
+  document.getElementById('resultsCount').textContent =
+    `${filteredData.length} de ${allData.length} operadores`;
+}
+
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterTurno').value = '';
+  document.getElementById('filterProcesso').value = '';
+  document.getElementById('filterClassificacao').value = '';
+  document.getElementById('filterTL').value = '';
+  document.getElementById('filterPCD').value = '';
+  activeTL = null;
+  renderTLCards();
+  applyFilters();
+}
+
+// ─── SORT ───
+function sortBy(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.textContent.trim() === col || th.getAttribute('onclick')?.includes(col)) {
+      th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+    }
+  });
+
+  sortData();
+  renderTable();
+}
+
+function sortData() {
+  filteredData.sort((a, b) => {
+    const av = (a[sortCol] || '').toString().toLowerCase();
+    const bv = (b[sortCol] || '').toString().toLowerCase();
+    return sortAsc ? av.localeCompare(bv, 'pt-BR') : bv.localeCompare(av, 'pt-BR');
+  });
+}
+
+// ─── TABLE RENDER ───
+function getStatusBadge(s) {
+  if (!s) return '<span class="badge badge-other">—</span>';
+  const sl = s.toLowerCase();
+  if (sl === 'ativo') return `<span class="badge badge-ativo">${s}</span>`;
+  if (sl.includes('afastado')) return `<span class="badge badge-afastado">${s}</span>`;
+  if (sl.includes('férias') || sl.includes('ferias')) return `<span class="badge badge-ferias">${s}</span>`;
+  return `<span class="badge badge-other">${s}</span>`;
+}
+
+function getClassBadge(c) {
+  if (!c) return '';
+  const map = { Direto: 'direto', Suporte: 'suporte', Staff: 'staff' };
+  const cls = map[c] || 'other';
+  return `<span class="badge badge-${cls}">${c}</span>`;
+}
+
+function getTurnoBadge(t) {
+  if (!t) return '';
+  const map = { T1: 't1', T2: 't2', T2A: 't2', T3: 't3', T4: 't4', ST: 'st' };
+  const cls = map[t] || 'other';
+  return `<span class="badge badge-${cls}">${t}</span>`;
+}
+
+function getPCDBadge(p) {
+  if (!p || p === 'NÃO' || p === 'NAO') return '';
+  return `<span class="badge badge-pcd">${p}</span>`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+
+  if (filteredData.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  tbody.innerHTML = filteredData.map(r => `
+    <tr>
+      <td class="td-name" title="${r['Nome']}">${r['Nome']}</td>
+      <td class="td-matricula">${r['Matricula'] || '—'}</td>
+      <td>${getStatusBadge(r['Status'])}</td>
+      <td>${r['Cargo'] || '—'}</td>
+      <td>${getClassBadge(r['Classificacao'])}</td>
+      <td class="td-turno">${getTurnoBadge(r['Macro Turno'])} ${r['Macro Turno'] || ''}</td>
+      <td>${r['Processo'] || '—'}</td>
+      <td>${r['Sub- Processo'] || '—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="${r['Gestor Imediato']}">${r['Gestor Imediato'] || '—'}</td>
+      <td>${r['Admissao'] || '—'}</td>
+      <td>${getPCDBadge(r['PCD'])}</td>
+      <td>${r['Modelo'] || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── INIT ───
+loadData();
+</script>
+</body>
+</html>
