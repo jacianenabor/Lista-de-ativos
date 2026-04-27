@@ -103,6 +103,16 @@
   .summary-card .value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--near-black); line-height: 1; }
   .summary-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
+  .summary-card-alert {
+    background: #fff5f5;
+    border-color: #fca5a5 !important;
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.15); }
+    50%       { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+  }
+
   .section-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
 
   /* ─── TL CARDS ─── */
@@ -197,6 +207,94 @@
   .welcome-upload-btn { background: var(--yellow); border: none; border-radius: 8px; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--near-black); transition: all 0.15s; }
   .welcome-upload-btn:hover { background: var(--yellow-dark); transform: translateY(-1px); }
 
+  /* ─── NAVEGAÇÃO DE ABAS ─── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+  }
+  .nav-tab {
+    padding: 10px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    border-radius: 6px 6px 0 0;
+  }
+  .nav-tab:hover { color: var(--near-black); background: var(--border); }
+  .nav-tab.active { color: var(--near-black); border-bottom-color: var(--yellow); background: #fffde7; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── AGÊNCIA ─── */
+  .agency-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .agency-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .agency-stat-pill {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .agency-stat-pill strong { color: var(--near-black); font-size: 14px; }
+
+  .agency-table-wrapper { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .agency-table-scroll { overflow-x: auto; overflow-y: auto; max-height: 65vh; }
+
+  .days-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .days-ok   { background: #dcfce7; color: #15803d; }
+  .days-warn { background: #fee2e2; color: #b91c1c; }
+  .days-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .days-ok .days-dot   { background: #15803d; }
+  .days-warn .days-dot { background: #b91c1c; }
+
+  .agency-filter-bar {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+  }
+
   footer { text-align: center; padding: 20px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); }
 
   @media (max-width: 768px) {
@@ -289,90 +387,154 @@
   <div id="mainContent" style="display:none">
     <div class="summary-grid" id="summaryGrid"></div>
 
-    <div class="tl-section">
-      <div class="section-title">Indicadores por Team Leader</div>
-      <div class="tl-grid" id="tlGrid"></div>
+    <!-- ABAS -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('tabGeral', this)">📋 Visão Geral</button>
+      <button class="nav-tab" onclick="switchTab('tabAgencia', this)">🏢 Agência</button>
     </div>
 
-    <div class="charts-section">
-      <div class="section-title">Distribuição</div>
-      <div class="charts-grid">
-        <div class="chart-card"><div class="chart-title">Por Turno</div><div class="bar-chart" id="chartTurno"></div></div>
-        <div class="chart-card"><div class="chart-title">Por Processo</div><div class="bar-chart" id="chartProcesso"></div></div>
-        <div class="chart-card"><div class="chart-title">Por Status</div><div class="bar-chart" id="chartStatus"></div></div>
-        <div class="chart-card"><div class="chart-title">Por Cargo</div><div class="bar-chart" id="chartCargo"></div></div>
+    <!-- ABA: VISÃO GERAL -->
+    <div id="tabGeral" class="tab-panel active">
+      <div class="tl-section">
+        <div class="section-title">Indicadores por Team Leader</div>
+        <div class="tl-grid" id="tlGrid"></div>
       </div>
-    </div>
 
-    <div class="filters-section">
-      <div class="section-title">Lista de Operadores</div>
-      <div class="filters-bar">
+      <div class="charts-section">
+        <div class="section-title">Distribuição</div>
+        <div class="charts-grid">
+          <div class="chart-card"><div class="chart-title">Por Turno</div><div class="bar-chart" id="chartTurno"></div></div>
+          <div class="chart-card"><div class="chart-title">Por Processo</div><div class="bar-chart" id="chartProcesso"></div></div>
+          <div class="chart-card"><div class="chart-title">Por Status</div><div class="bar-chart" id="chartStatus"></div></div>
+          <div class="chart-card"><div class="chart-title">Por Cargo</div><div class="bar-chart" id="chartCargo"></div></div>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <div class="section-title">Lista de Operadores</div>
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label>Busca na tabela</label>
+            <input type="text" class="search-input" id="searchInput" placeholder="Nome ou matrícula…" oninput="applyTableFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Team Leader</label>
+            <select id="tableTL" onchange="applyTableFilters()"><option value="">Todos</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Turno</label>
+            <select id="tableTurno" onchange="applyTableFilters()"><option value="">Todos</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Supervisão</label>
+            <select id="tableGestao" onchange="applyTableFilters()"><option value="">Todos</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Gerência</label>
+            <select id="tableGerente" onchange="applyTableFilters()"><option value="">Todos</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Empresa</label>
+            <select id="tableEmpresa" onchange="applyTableFilters()"><option value="">Todos</option></select>
+          </div>
+          <div class="filter-group">
+            <label>PCD</label>
+            <select id="tablePCD" onchange="applyTableFilters()">
+              <option value="">Todos</option>
+              <option value="NAO">Não PCD</option>
+              <option value="SIM">PCD</option>
+            </select>
+          </div>
+          <button class="clear-btn" onclick="clearTableFilters()" style="align-self:flex-end">Limpar</button>
+          <span class="results-count" id="resultsCount"></span>
+        </div>
+      </div>
+
+      <div class="table-section">
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th onclick="sortBy('Nome')">Nome</th>
+                  <th onclick="sortBy('Matricula')">Matrícula</th>
+                  <th onclick="sortBy('Status')">Status</th>
+                  <th onclick="sortBy('Cargo')">Cargo</th>
+                  <th onclick="sortBy('Classificacao')">Classificação</th>
+                  <th onclick="sortBy('Macro Turno')">Turno</th>
+                  <th onclick="sortBy('Processo')">Processo</th>
+                  <th onclick="sortBy('Sub- Processo')">Sub-Processo</th>
+                  <th onclick="sortBy('Gestor Imediato')">Team Leader</th>
+                  <th onclick="sortBy('Admissao')">Admissão</th>
+                  <th onclick="sortBy('PCD')">PCD</th>
+                  <th onclick="sortBy('Modelo')">Modelo</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="emptyState">
+            <div class="icon">🔍</div>
+            <p>Nenhum operador encontrado com os filtros atuais.</p>
+          </div>
+        </div>
+      </div>
+    </div> <!-- fim tabGeral -->
+
+    <!-- ABA: AGÊNCIA -->
+    <div id="tabAgencia" class="tab-panel">
+      <div class="agency-header">
+        <div class="agency-stats" id="agencyStats"></div>
+      </div>
+
+      <!-- Filtros da aba agência -->
+      <div class="agency-filter-bar">
         <div class="filter-group">
-          <label>Busca na tabela</label>
-          <input type="text" class="search-input" id="searchInput" placeholder="Nome ou matrícula…" oninput="applyTableFilters()">
+          <label>Busca</label>
+          <input type="text" class="search-input" id="agencySearch" placeholder="Nome…" oninput="renderAgencyTable()" style="min-width:200px">
         </div>
         <div class="filter-group">
-          <label>Team Leader</label>
-          <select id="tableTL" onchange="applyTableFilters()"><option value="">Todos</option></select>
+          <label>Agência</label>
+          <select id="agencyEmpresa" onchange="renderAgencyTable()"><option value="">Todas</option></select>
         </div>
         <div class="filter-group">
-          <label>Turno</label>
-          <select id="tableTurno" onchange="applyTableFilters()"><option value="">Todos</option></select>
-        </div>
-        <div class="filter-group">
-          <label>Supervisão</label>
-          <select id="tableGestao" onchange="applyTableFilters()"><option value="">Todos</option></select>
-        </div>
-        <div class="filter-group">
-          <label>Gerência</label>
-          <select id="tableGerente" onchange="applyTableFilters()"><option value="">Todos</option></select>
-        </div>
-        <div class="filter-group">
-          <label>Empresa</label>
-          <select id="tableEmpresa" onchange="applyTableFilters()"><option value="">Todos</option></select>
-        </div>
-        <div class="filter-group">
-          <label>PCD</label>
-          <select id="tablePCD" onchange="applyTableFilters()">
-            <option value="">Todos</option>
-            <option value="NAO">Não PCD</option>
-            <option value="SIM">PCD</option>
+          <label>Situação</label>
+          <select id="agencyDays" onchange="renderAgencyTable()">
+            <option value="">Todas</option>
+            <option value="ok">✅ Até 30 dias</option>
+            <option value="warn">🔴 Acima de 30 dias</option>
           </select>
         </div>
-        <button class="clear-btn" onclick="clearTableFilters()" style="align-self:flex-end">Limpar</button>
-        <span class="results-count" id="resultsCount"></span>
+        <div class="filter-group">
+          <label>Status</label>
+          <select id="agencyStatus" onchange="renderAgencyTable()"><option value="">Todos</option></select>
+        </div>
+        <button class="clear-btn" onclick="clearAgencyFilters()" style="align-self:flex-end">Limpar</button>
+        <span class="results-count" id="agencyCount"></span>
       </div>
-    </div>
 
-    <div class="table-section">
-      <div class="table-wrapper">
-        <div class="table-scroll">
+      <div class="agency-table-wrapper">
+        <div class="agency-table-scroll">
           <table>
             <thead>
               <tr>
-                <th onclick="sortBy('Nome')">Nome</th>
-                <th onclick="sortBy('Matricula')">Matrícula</th>
-                <th onclick="sortBy('Status')">Status</th>
-                <th onclick="sortBy('Cargo')">Cargo</th>
-                <th onclick="sortBy('Classificacao')">Classificação</th>
-                <th onclick="sortBy('Macro Turno')">Turno</th>
-                <th onclick="sortBy('Processo')">Processo</th>
-                <th onclick="sortBy('Sub- Processo')">Sub-Processo</th>
-                <th onclick="sortBy('Gestor Imediato')">Team Leader</th>
-                <th onclick="sortBy('Admissao')">Admissão</th>
-                <th onclick="sortBy('PCD')">PCD</th>
-                <th onclick="sortBy('Modelo')">Modelo</th>
+                <th onclick="agencySortBy('Nome')">Nome</th>
+                <th onclick="agencySortBy('Empresa')">Agência</th>
+                <th onclick="agencySortBy('Status')">Status</th>
+                <th onclick="agencySortBy('Admissao')">Admissão</th>
+                <th onclick="agencySortBy('Tempo de Empresa (Dias)')">Dias de Empresa</th>
+                <th onclick="agencySortBy('Gestor Imediato')">Team Leader</th>
               </tr>
             </thead>
-            <tbody id="tableBody"></tbody>
+            <tbody id="agencyTableBody"></tbody>
           </table>
         </div>
-        <div class="empty-state" id="emptyState">
-          <div class="icon">🔍</div>
-          <p>Nenhum operador encontrado com os filtros atuais.</p>
+        <div class="empty-state" id="agencyEmptyState" style="display:none">
+          <div class="icon">🏢</div>
+          <p>Nenhum operador de agência encontrado.</p>
         </div>
       </div>
-    </div>
+    </div> <!-- fim tabAgencia -->
   </div>
 
   <div id="welcomeState" class="welcome-state">
@@ -409,6 +571,7 @@ document.getElementById('csvFileInput').addEventListener('change', function(e) {
       if (allData.length === 0) throw new Error('Nenhum dado encontrado. Verifique se o arquivo tem a coluna "Nome".');
       populateHeaderFilters();
       applyGlobalFilters();
+      populateAgencyFilters();
       document.getElementById('welcomeState').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
       document.getElementById('headerFilters').classList.add('visible');
@@ -721,7 +884,146 @@ function clearTableFilters() {
   applyTableFilters();
 }
 
-// ─── TL CLICK ───
+// ─── ABAS ───
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+  if (tabId === 'tabAgencia') renderAgencyTable();
+}
+
+// ─── AGÊNCIA ───
+let agencySortCol = 'Tempo de Empresa (Dias)';
+let agencySortAsc = true;
+
+function getAgencyData() {
+  return globalData.filter(r => !r['Empresa']?.toLowerCase().includes('mercado livre'));
+}
+
+function calcDias(r) {
+  const admissao = r['Admissao'] || '';
+  if (!admissao) return null;
+  // Aceita dd/mm/yyyy ou yyyy-mm-dd
+  let d;
+  if (admissao.includes('/')) {
+    const [dia, mes, ano] = admissao.split('/');
+    d = new Date(`${ano}-${mes}-${dia}`);
+  } else {
+    d = new Date(admissao);
+  }
+  if (isNaN(d)) return null;
+  return Math.floor((new Date() - d) / 86400000);
+}
+
+function populateAgencyFilters() {
+  const data = getAgencyData();
+  // Empresas
+  const empSel = document.getElementById('agencyEmpresa');
+  empSel.innerHTML = '<option value="">Todas</option>';
+  uniqueValuesCI(data, 'Empresa').forEach(v => {
+    const o = document.createElement('option'); o.value = v; o.textContent = v; empSel.appendChild(o);
+  });
+  // Status
+  const stSel = document.getElementById('agencyStatus');
+  stSel.innerHTML = '<option value="">Todos</option>';
+  uniqueValuesCI(data, 'Status').forEach(v => {
+    const o = document.createElement('option'); o.value = v; o.textContent = v; stSel.appendChild(o);
+  });
+}
+
+function renderAgencyTable() {
+  let data = getAgencyData();
+  const search  = document.getElementById('agencySearch').value.toLowerCase().trim();
+  const empresa = document.getElementById('agencyEmpresa').value;
+  const days    = document.getElementById('agencyDays').value;
+  const status  = document.getElementById('agencyStatus').value;
+
+  data = data.filter(r => {
+    if (search && !r['Nome'].toLowerCase().includes(search)) return false;
+    if (empresa && r['Empresa']?.trim().toLowerCase() !== empresa.toLowerCase()) return false;
+    if (status && r['Status']?.trim().toLowerCase() !== status.toLowerCase()) return false;
+    if (days) {
+      const d = calcDias(r);
+      if (days === 'ok'   && (d === null || d > 30))  return false;
+      if (days === 'warn' && (d === null || d <= 30))  return false;
+    }
+    return true;
+  });
+
+  // Sort
+  data.sort((a, b) => {
+    let av = a[agencySortCol] || '';
+    let bv = b[agencySortCol] || '';
+    if (agencySortCol === 'Tempo de Empresa (Dias)') {
+      av = calcDias(a) ?? 9999;
+      bv = calcDias(b) ?? 9999;
+      return agencySortAsc ? av - bv : bv - av;
+    }
+    av = av.toString().toLowerCase();
+    bv = bv.toString().toLowerCase();
+    return agencySortAsc ? av.localeCompare(bv, 'pt-BR') : bv.localeCompare(av, 'pt-BR');
+  });
+
+  const tbody = document.getElementById('agencyTableBody');
+  const empty = document.getElementById('agencyEmptyState');
+  const total = getAgencyData().length;
+  const ok    = getAgencyData().filter(r => { const d = calcDias(r); return d !== null && d <= 30; }).length;
+  const warn  = total - ok;
+
+  // Stats pills
+  document.getElementById('agencyStats').innerHTML = `
+    <div class="agency-stat-pill">Total agência: <strong>${total}</strong></div>
+    <div class="agency-stat-pill" style="border-color:#bbf7d0">✅ Até 30 dias: <strong style="color:#15803d">${ok}</strong></div>
+    <div class="agency-stat-pill" style="border-color:#fecaca">🔴 Acima de 30 dias: <strong style="color:#b91c1c">${warn}</strong></div>
+  `;
+
+  document.getElementById('agencyCount').textContent = `${data.length} de ${total} operadores`;
+
+  if (data.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(r => {
+    const dias = calcDias(r);
+    const cls  = dias === null ? '' : dias <= 30 ? 'days-ok' : 'days-warn';
+    const dot  = dias !== null ? `<span class="days-dot"></span>` : '';
+    const label = dias !== null ? `${dias} dias` : '—';
+    return `
+      <tr>
+        <td class="td-name" title="${r['Nome']}">${r['Nome']}</td>
+        <td>${r['Empresa'] || '—'}</td>
+        <td>${getStatusBadge(r['Status'])}</td>
+        <td>${r['Admissao'] || '—'}</td>
+        <td><span class="days-badge ${cls}">${dot}${label}</span></td>
+        <td>${r['Gestor Imediato'] || '—'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Atualiza sort visual
+  document.querySelectorAll('#tabAgencia thead th').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.getAttribute('onclick')?.includes(`'${agencySortCol}'`)) {
+      th.classList.add(agencySortAsc ? 'sort-asc' : 'sort-desc');
+    }
+  });
+}
+
+function agencySortBy(col) {
+  if (agencySortCol === col) agencySortAsc = !agencySortAsc;
+  else { agencySortCol = col; agencySortAsc = true; }
+  renderAgencyTable();
+}
+
+function clearAgencyFilters() {
+  document.getElementById('agencySearch').value = '';
+  document.getElementById('agencyEmpresa').value = '';
+  document.getElementById('agencyDays').value = '';
+  document.getElementById('agencyStatus').value = '';
+  renderAgencyTable();
+}
+
+// ─── ABAS ───
 function filterByTL(tl) {
   activeTLClick = activeTLClick === tl ? null : tl;
   renderTLCards();
@@ -738,24 +1040,47 @@ function renderSummary() {
   const tls       = new Set(d.map(r => r['Gestor Imediato']).filter(Boolean)).size;
   const ml        = d.filter(r => r['Empresa']?.toLowerCase().includes('mercado livre')).length;
   const agencia   = total - ml;
+  const agencia30 = d.filter(r => {
+    if (r['Empresa']?.toLowerCase().includes('mercado livre')) return false;
+    const dias = calcDias(r);
+    return dias !== null && dias > 30;
+  }).length;
   const pct = n => total ? `${((n/total)*100).toFixed(0)}%` : '0%';
 
-  document.getElementById('summaryGrid').innerHTML = [
-    { label:'Total de Ativos', value:total,    sub:'operadores no filtro',   accent:'#FEE600' },
-    { label:'Mercado Livre',   value:ml,        sub:`${pct(ml)} do quadro`,  accent:'#16a34a' },
-    { label:'Agência',         value:agencia,   sub:`${pct(agencia)} do quadro`, accent:'#f97316' },
-    { label:'Ativos',          value:ativos,    sub:`${pct(ativos)} do filtro`,  accent:'#bbf7d0' },
-    { label:'Afastados',       value:afastados, sub:`${pct(afastados)} do filtro`, accent:'#fecaca' },
-    { label:'Em Férias',       value:ferias,    sub:`${pct(ferias)} do filtro`,  accent:'#bfdbfe' },
-    { label:'Team Leaders',    value:tls,       sub:'no filtro atual',        accent:'#e9d5ff' },
-    { label:'PCD',             value:pcds,      sub:`${pct(pcds)} do quadro`, accent:'#fed7aa' },
-  ].map(c => `
-    <div class="summary-card" style="--accent:${c.accent}">
-      <div class="label">${c.label}</div>
-      <div class="value">${c.value}</div>
-      <div class="sub">${c.sub}</div>
+  const cards = [
+    { label:'Total de Ativos', value:total,     sub:'operadores no filtro',    accent:'#FEE600' },
+    { label:'Mercado Livre',   value:ml,         sub:`${pct(ml)} do quadro`,   accent:'#16a34a' },
+    { label:'Agência',         value:agencia,    sub:`${pct(agencia)} do quadro`, accent:'#f97316' },
+    { label:'Ativos',          value:ativos,     sub:`${pct(ativos)} do filtro`,  accent:'#bbf7d0' },
+    { label:'Afastados',       value:afastados,  sub:`${pct(afastados)} do filtro`, accent:'#fecaca' },
+    { label:'Em Férias',       value:ferias,     sub:`${pct(ferias)} do filtro`,  accent:'#bfdbfe' },
+    { label:'Team Leaders',    value:tls,        sub:'no filtro atual',         accent:'#e9d5ff' },
+    { label:'PCD',             value:pcds,       sub:`${pct(pcds)} do quadro`,  accent:'#fed7aa' },
+  ];
+
+  // Card de alerta agência >30 dias (destaque especial)
+  const alertCard = agencia30 > 0 ? `
+    <div class="summary-card summary-card-alert" style="--accent:#dc2626">
+      <div class="label">⚠️ Agência +30 dias</div>
+      <div class="value" style="color:#dc2626">${agencia30}</div>
+      <div class="sub">decisão de efetivação pendente</div>
     </div>
-  `).join('');
+  ` : `
+    <div class="summary-card" style="--accent:#16a34a">
+      <div class="label">✅ Agência +30 dias</div>
+      <div class="value" style="color:#16a34a">0</div>
+      <div class="sub">nenhuma decisão pendente</div>
+    </div>
+  `;
+
+  document.getElementById('summaryGrid').innerHTML =
+    cards.map(c => `
+      <div class="summary-card" style="--accent:${c.accent}">
+        <div class="label">${c.label}</div>
+        <div class="value">${c.value}</div>
+        <div class="sub">${c.sub}</div>
+      </div>
+    `).join('') + alertCard;
 }
 
 // ─── TL CARDS ───
